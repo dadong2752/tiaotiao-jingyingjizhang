@@ -1,5 +1,47 @@
 # 修改日志 (Change Log)
 
+## 2026-08-21/22 版本 1.0.4
+
+### 安全修复
+
+| 问题 | 文件 | 修复内容 | 状态 |
+|------|------|---------|------|
+| migrateRecords无限循环死锁 | migrateRecords/index.js | 使用offset分页，避免死循环 | ✅ |
+| reviewer查询语法错误 | getTransactions/index.js | 使用db.command.or()正确语法 | ✅ |
+| stats查询条件覆盖 | getTransactions/index.js | 使用db.command.and()组合条件 | ✅ |
+| update参数校验缺失 | getTransactions/index.js | 添加category/amount/date校验 | ✅ |
+| 审核通过记录可修改/删除 | getTransactions/index.js | 添加status检查禁止操作 | ✅ |
+| 角色修改缺乏值校验 | manageUsers/index.js | 添加newRole白名单验证 | ✅ |
+| 删除用户未检查目标角色 | manageUsers/index.js | 禁止删除店长账号 | ✅ |
+| 前端record未检查 | index.js | editRecord/deleteRecord添加存在检查 | ✅ |
+
+### 功能修复
+
+| 问题 | 文件 | 修复内容 | 状态 |
+|------|------|---------|------|
+| reviewer可审核自己记录 | getTransactions/index.js | 添加creatorOpenId检查 | ✅ |
+| 访客迁移记录缺status | index.js | 迁移时添加status:'approved' | ✅ |
+| doExport死代码 | index.js | 删除未使用的generateCSV | ✅ |
+| app.js无用数据库查询 | app.js | 删除测试代码 | ✅ |
+
+### 新增功能
+
+| 功能 | 文件 | 说明 | 状态 |
+|------|------|------|------|
+| sendReminder定时触发器 | sendReminder/config.json | 每天21:00自动提醒 | ✅ |
+| 数据分页支持 | getTransactions/index.js | getAllRecords支持超1000条 | ✅ |
+
+### 权限系统
+
+| 角色 | 标识 | 说明 |
+|------|------|------|
+| 店长 | owner | 最高权限，管理员工 |
+| 管理员 | admin | 管理所有数据 |
+| 审核员 | reviewer | 审核记录 |
+| 录入员 | employee | 录入自己的记录（默认） |
+
+---
+
 ## 2026-08-16
 
 ### 代码审查与安全修复
