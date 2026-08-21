@@ -40,23 +40,23 @@ exports.main = async (event, context) => {
     })
 
     // 获取所有需要迁移的记录（没有 creatorOpenId 的记录）
-    let hasMore = true
+    let offset = 0
     let totalMigrated = 0
     let totalSkipped = 0
     const batchSize = 100
 
-    while (hasMore) {
+    while (true) {
       const recordsRes = await transactionsCollection
         .where({
           creatorOpenId: db.command.exists(false)
         })
+        .skip(offset)
         .limit(batchSize)
         .get()
 
       const records = recordsRes.data
 
       if (records.length === 0) {
-        hasMore = false
         break
       }
 
@@ -70,13 +70,22 @@ exports.main = async (event, context) => {
           })
           totalMigrated++
         } else {
+          // 标记为已尝试迁移，避免重复查询
+          await transactionsCollection.doc(record._id).update({
+            data: {
+              creatorOpenId: 'unknown',
+              migrateSkipped: true
+            }
+          })
           totalSkipped++
         }
       }
 
+      offset += records.length
+
       // 如果返回的记录数小于批次大小，说明已经处理完
       if (records.length < batchSize) {
-        hasMore = false
+        break
       }
     }
 

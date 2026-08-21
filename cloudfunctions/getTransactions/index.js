@@ -5,6 +5,20 @@ cloud.init({ env: 'cloud1-d6gqwroxrc08ea02c' })
 const db = cloud.database()
 const COLLECTION = 'transactions'
 
+// 分页获取所有记录
+async function getAllRecords(query) {
+  const allData = []
+  let offset = 0
+  const pageSize = 100
+  while (true) {
+    const res = await query.skip(offset).limit(pageSize).get()
+    allData.push(...res.data)
+    if (res.data.length < pageSize) break
+    offset += pageSize
+  }
+  return allData
+}
+
 exports.main = async (event, context) => {
   const { action } = event
   const wxContext = cloud.getWXContext()
@@ -32,19 +46,17 @@ exports.main = async (event, context) => {
         // 看全部数据
       } else if (isReviewer) {
         // reviewer 看自己的 + 已审核的
-        query = query.where({
-          or: [
-            { creatorOpenId: openId },
-            { status: 'approved' }
-          ]
-        })
+        query = query.where(db.command.or([
+          { creatorOpenId: openId },
+          { status: 'approved' }
+        ]))
       } else {
         // employee 只能看自己的
         query = query.where({ creatorOpenId: openId })
       }
 
-      const res = await query.limit(1000).get()
-      return { success: true, data: res.data }
+      const res = await getAllRecords(query)
+      return { success: true, data: res }
     }
 
     // 创建新记录
@@ -156,36 +168,32 @@ exports.main = async (event, context) => {
     if (action === 'stats') {
       const { today, monthStart } = event
 
-      // 构建查询条件
-      let todayQuery = db.collection(COLLECTION).where({ date: today })
-      let monthQuery = db.collection(COLLECTION).where({
-        date: db.command.gte(monthStart)
-      })
+      // 构建查询条件（使用 and 组合条件，避免覆盖）
+      let todayCondition = { date: today }
+      let monthCondition = { date: db.command.gte(monthStart) }
 
       // 非店长和非管理员只能看自己的记录
       if (!isOwner && !isAdmin) {
         if (isReviewer) {
           // reviewer 看自己的 + 已审核的
-          todayQuery = todayQuery.where(db.command.or(
+          const roleCondition = db.command.or([
             { creatorOpenId: openId },
             { status: 'approved' }
-          ))
-          monthQuery = monthQuery.where(db.command.or(
-            { creatorOpenId: openId },
-            { status: 'approved' }
-          ))
+          ])
+          todayCondition = db.command.and({ date: today }, roleCondition)
+          monthCondition = db.command.and({ date: db.command.gte(monthStart) }, roleCondition)
         } else {
           // employee 只能看自己的
-          todayQuery = todayQuery.where({ creatorOpenId: openId })
-          monthQuery = monthQuery.where({ creatorOpenId: openId })
+          todayCondition = { date: today, creatorOpenId: openId }
+          monthCondition = { date: db.command.gte(monthStart), creatorOpenId: openId }
         }
       }
 
       // 获取今日数据
-      const todayRes = await todayQuery.get()
+      const todayRes = await db.collection(COLLECTION).where(todayCondition).get()
 
       // 获取本月数据
-      const monthRes = await monthQuery.get()
+      const monthRes = await db.collection(COLLECTION).where(monthCondition).get()
 
       let todayIncome = 0, todayExpense = 0
       let monthIncome = 0, monthExpense = 0
