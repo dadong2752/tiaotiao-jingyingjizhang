@@ -118,6 +118,11 @@ exports.main = async (event, context) => {
         return { success: false, error: '记录不存在' }
       }
 
+      // 不能审核自己的记录
+      if (recordRes.data.creatorOpenId === openId) {
+        return { success: false, error: '不能审核自己的记录' }
+      }
+
       // 检查记录状态，只能审核待审核状态的记录
       if (recordRes.data.status !== 'pending') {
         return { success: false, error: '只能审核待审核状态的记录' }
@@ -146,6 +151,11 @@ exports.main = async (event, context) => {
       const recordRes = await db.collection(COLLECTION).doc(recordId).get()
       if (!recordRes.data) {
         return { success: false, error: '记录不存在' }
+      }
+
+      // 不能驳回自己的记录
+      if (recordRes.data.creatorOpenId === openId) {
+        return { success: false, error: '不能驳回自己的记录' }
       }
 
       // 检查记录状态，只能驳回待审核状态的记录

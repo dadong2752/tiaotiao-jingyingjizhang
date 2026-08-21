@@ -1,5 +1,12 @@
 {
   "name": "sendReminder",
   "version": "1.0.0",
-  "main": "index.js"
+  "main": "index.js",
+  "triggers": [
+    {
+      "name": "dailyReminderTimer",
+      "type": "timer",
+      "config": "0 0 21 * * * *"
+    }
+  ]
 }

@@ -480,6 +480,7 @@ Page({
             creator: '访客导入',
             creatorOpenId: this.data.userInfo.openId,
             creatorAvatar: this.data.userInfo.avatarUrl,
+            status: 'approved',
             migratedFrom: 'guest'
           }
         });
@@ -1396,9 +1397,6 @@ Page({
             wx.showToast({ title: '暂无数据', icon: 'none' });
             return;
           }
-
-          // 生成 CSV
-          const csvContent = this.generateCSV(data);
 
           // 保存到本地文件
           const fileName = `export_${today.replace(/-/g, '')}.xls`;
