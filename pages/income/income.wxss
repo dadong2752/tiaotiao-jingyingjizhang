@@ -1,0 +1,331 @@
+/* pages/income/income.wxss */
+page {
+  background-color: #F5F5F5;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.container {
+  padding: 20rpx;
+}
+
+/* 导航栏 */
+.nav-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+  margin-bottom: 20rpx;
+}
+
+.nav-back {
+  font-size: 28rpx;
+  color: #1890FF;
+  padding: 10rpx 20rpx;
+}
+
+.nav-title {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.nav-export {
+  font-size: 28rpx;
+  color: #1890FF;
+  padding: 10rpx 20rpx;
+}
+
+/* 月份选择器 */
+.month-selector {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+}
+
+.month-btn {
+  width: 60rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: #1890FF;
+}
+
+.month-display {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 总收入卡片 */
+.total-card {
+  background: linear-gradient(135deg, #52C41A 0%, #73D13D 100%);
+  border-radius: 16rpx;
+  padding: 40rpx;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+.total-label {
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 10rpx;
+}
+
+.total-amount {
+  font-size: 56rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+/* 分类筛选 */
+.filter-section {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+}
+
+.filter-title {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 16rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.add-category-btn {
+  font-size: 26rpx;
+  color: #1890FF;
+  padding: 8rpx 16rpx;
+  background: #E6F7FF;
+  border-radius: 8rpx;
+}
+
+.filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.filter-tag {
+  padding: 12rpx 24rpx;
+  font-size: 26rpx;
+  color: #666;
+  background: #f5f5f5;
+  border-radius: 8rpx;
+  border: 2rpx solid transparent;
+}
+
+.filter-tag.active {
+  background: #F6FFED;
+  color: #52C41A;
+  border-color: #52C41A;
+}
+
+/* 分类统计 */
+.category-section {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.category-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.category-info {
+  display: flex;
+  align-items: center;
+}
+
+.category-dot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  margin-right: 12rpx;
+}
+
+.category-name {
+  font-size: 28rpx;
+  color: #333;
+  margin-right: 12rpx;
+}
+
+.category-count {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.category-amount {
+  text-align: right;
+}
+
+.amount-value {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-right: 12rpx;
+}
+
+.amount-percent {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 收入明细列表 */
+.detail-section {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+}
+
+.empty-tip {
+  text-align: center;
+  color: #999;
+  padding: 60rpx 0;
+  font-size: 28rpx;
+}
+
+.income-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.income-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.income-item:last-child {
+  border-bottom: none;
+}
+
+.income-left {
+  flex: 1;
+}
+
+.income-category {
+  display: block;
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.income-date {
+  display: block;
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 4rpx;
+}
+
+.income-remark {
+  display: block;
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 4rpx;
+}
+
+.income-right {
+  text-align: right;
+}
+
+.income-amount {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #52C41A;
+}
+
+/* 弹窗样式 */
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+}
+
+.modal-content {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 40rpx;
+  width: 500rpx;
+  z-index: 100;
+}
+
+.modal-header {
+  font-size: 34rpx;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 30rpx;
+  color: #333;
+}
+
+.form-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.form-label {
+  width: 160rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.form-input {
+  flex: 1;
+  font-size: 28rpx;
+  text-align: right;
+}
+
+.submit-btn {
+  margin-top: 30rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  font-size: 30rpx;
+  font-weight: bold;
+  background-color: #52C41A;
+  color: #FFFFFF;
+  border-radius: 12rpx;
+  border: none;
+}
+
+.submit-btn.disabled {
+  background-color: #CCCCCC;
+}
+
+.submit-btn.cancel-btn {
+  background-color: #999;
+}

@@ -1,0 +1,83 @@
+<!-- pages/expense/expense.wxml -->
+<view class="container">
+  <!-- 顶部导航 -->
+  <view class="nav-bar">
+    <view class="nav-back" bindtap="goBack">返回</view>
+    <view class="nav-title">支出明细</view>
+    <view class="nav-export" bindtap="exportExpense">导出</view>
+  </view>
+
+  <!-- 月份选择器 -->
+  <view class="month-selector">
+    <view class="month-btn" bindtap="prevMonth">◀</view>
+    <view class="month-display">{{year}}年{{month}}月</view>
+    <view class="month-btn" bindtap="nextMonth">▶</view>
+  </view>
+
+  <!-- 总支出统计 -->
+  <view class="total-card">
+    <view class="total-label">本月支出</view>
+    <view class="total-amount">¥ {{totalExpense}}</view>
+  </view>
+
+  <!-- 分类筛选 -->
+  <view class="filter-section">
+    <view class="filter-title">
+      分类筛选
+      <text class="add-category-btn" bindtap="showAddCategory">+ 添加分类</text>
+    </view>
+    <view class="filter-tags">
+      <view class="filter-tag {{selectedCategories.length === allCategories.length ? 'active' : ''}}" bindtap="toggleAllCategories">全部</view>
+      <view wx:for="{{allCategories}}" wx:key="*this" class="filter-tag {{selectedCategories.indexOf(item) > -1 ? 'active' : ''}}" bindtap="toggleCategory" data-category="{{item}}">{{item}}</view>
+    </view>
+  </view>
+
+  <!-- 分类统计 -->
+  <view class="category-section" wx:if="{{categoryStats.length > 0}}">
+    <view class="section-title">分类统计</view>
+    <view class="category-list">
+      <view wx:for="{{categoryStats}}" wx:key="name" class="category-item">
+        <view class="category-info">
+          <view class="category-dot" style="background: {{item.color}}"></view>
+          <view class="category-name">{{item.name}}</view>
+          <view class="category-count">{{item.count}}笔</view>
+        </view>
+        <view class="category-amount">
+          <text class="amount-value">¥ {{item.amountDisplay}}</text>
+          <text class="amount-percent">{{item.percent}}%</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 支出明细列表 -->
+  <view class="detail-section">
+    <view class="section-title">支出记录</view>
+    <view wx:if="{{expenseList.length === 0}}" class="empty-tip">暂无支出记录</view>
+    <view wx:else class="expense-list">
+      <view wx:for="{{expenseList}}" wx:key="_id" class="expense-item">
+        <view class="expense-left">
+          <text class="expense-category">{{item.category}}</text>
+          <text class="expense-date">{{item.date}}</text>
+          <text wx:if="{{item.supplier}}" class="expense-supplier">供应商: {{item.supplier}}</text>
+          <text wx:if="{{item.remark}}" class="expense-remark">{{item.remark}}</text>
+        </view>
+        <view class="expense-right">
+          <text class="expense-amount">-{{item.amountDisplay}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 添加分类弹窗 -->
+<view class="modal-mask" wx:if="{{showAddCategoryModal}}" bindtap="closeAddCategoryModal"></view>
+<view class="modal-content" wx:if="{{showAddCategoryModal}}">
+  <view class="modal-header">添加分类</view>
+  <view class="form-item">
+    <text class="form-label">分类名称</text>
+    <input class="form-input" placeholder="请输入分类名称" bindinput="onNewCategoryInput" value="{{newCategoryName}}" />
+  </view>
+  <button class="submit-btn {{newCategoryName ? '' : 'disabled'}}" bindtap="addCategory">确定添加</button>
+  <button class="submit-btn cancel-btn" bindtap="closeAddCategoryModal">取消</button>
+</view>

@@ -1,0 +1,432 @@
+<!-- pages/index/index.wxml -->
+<view class="container">
+  <!-- Tab 切换 -->
+  <view class="tab-switch" wx:if="{{isLoggedIn}}">
+    <view class="tab-item {{currentTab === 'account' ? 'active' : ''}}" bindtap="switchTab" data-tab="account">记账</view>
+    <view class="tab-item {{currentTab === 'data' ? 'active' : ''}}" bindtap="switchTab" data-tab="data">数据</view>
+    <view class="tab-item {{currentTab === 'detail' ? 'active' : ''}}" bindtap="switchTab" data-tab="detail">明细</view>
+  </view>
+
+  <!-- 用户信息栏 -->
+  <view class="user-bar">
+    <!-- 左侧：登录/用户信息 -->
+    <button wx:if="{{!isLoggedIn}}" class="login-btn" open-type="getUserInfo" bindgetuserinfo="onGetUserInfo">
+      <view class="login-tip">
+        <text class="login-text">点击登录</text>
+      </view>
+    </button>
+    <view wx:else class="user-left" bindtap="showSettings">
+      <view wx:if="{{userInfo.avatarUrl}}" class="user-avatar" style="background-image: url({{userInfo.avatarUrl}});"></view>
+      <view wx:else class="user-avatar default-avatar" style="background-color: {{avatarColors[userInfo.nickName.charCodeAt(0) % avatarColors.length]}};">
+        <text class="avatar-letter">{{userInfo.nickName.charAt(0)}}</text>
+      </view>
+      <view class="user-info">
+        <text class="user-name">{{userInfo.nickName}}</text>
+        <text class="user-role {{userRole === 'owner' ? 'owner' : ''}}">{{userRole === 'owner' ? '店长' : '员工'}}</text>
+      </view>
+    </view>
+
+    <!-- 右侧：操作按钮 -->
+    <view class="user-right">
+      <view wx:if="{{isLoggedIn && userRole === 'owner'}}" class="action-btn" bindtap="showUserManage">员工</view>
+      <view wx:if="{{isLoggedIn}}" class="action-btn" bindtap="showSettings">设置</view>
+      <view wx:if="{{isLoggedIn}}" class="action-btn export-btn" bindtap="exportData">导出</view>
+    </view>
+  </view>
+
+  <!-- 访客模式提示条 -->
+  <view wx:if="{{isGuest}}" class="guest-tip-bar">
+    <text class="guest-tip-text">访客模式 - 登录后数据可同步</text>
+    <text class="guest-tip-login" bindtap="onGetUserInfo">登录</text>
+  </view>
+
+  <!-- 记账页面 -->
+  <view wx:if="{{currentTab === 'account'}}">
+    <!-- Logo 区 -->
+    <view class="logo-section">
+      <view class="logo-icon">
+        <view class="logo-coin">¥</view>
+      </view>
+      <view class="logo-text">餐饮记账</view>
+      <view class="logo-subtitle">每日收支 · 实时掌控</view>
+    </view>
+
+    <!-- 顶部关键指标区 -->
+    <view class="stats-card">
+      <view class="stats-title">今日数据</view>
+      <view class="stats-grid">
+        <view class="stat-item">
+          <text class="stat-label">收入</text>
+          <text class="stat-value income">+{{todayIncome}}</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-label">支出</text>
+          <text class="stat-value expense">-{{todayExpense}}</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-label">利润</text>
+          <text class="stat-value {{todayProfit >= 0 ? 'income' : 'expense'}}">{{todayProfit >= 0 ? '+' : ''}}{{todayProfit}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="stats-card">
+      <view class="stats-title">本月数据</view>
+      <view class="stats-grid">
+        <view class="stat-item">
+          <text class="stat-label">收入</text>
+          <text class="stat-value income">+{{monthIncome}}</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-label">支出</text>
+          <text class="stat-value expense">-{{monthExpense}}</text>
+        </view>
+        <view class="stat-item">
+          <view class="stat-label">利润</view>
+          <text class="stat-value {{monthProfit >= 0 ? 'income' : 'expense'}}">{{monthProfit >= 0 ? '+' : ''}}{{monthProfit}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 快捷操作区 -->
+    <view class="action-buttons">
+      <button class="action-btn income-btn" bindtap="showIncomeForm">记收入</button>
+      <button class="action-btn expense-btn" bindtap="showExpenseForm">记支出</button>
+      <button class="action-btn share-btn" open-type="share">分享</button>
+    </view>
+
+    <!-- 记录列表 -->
+    <view class="records-section">
+      <view class="section-title">最近记录</view>
+      <view wx:if="{{records.length === 0}}" class="empty-tip">开始我的饮品记录</view>
+      <view wx:else class="record-list">
+        <view wx:for="{{records}}" wx:key="_id" class="record-item" bindtap="editRecord" data-id="{{item._id}}">
+          <view class="record-left">
+            <text class="record-category">{{item.category}}</text>
+            <text class="record-date">{{item.date}}</text>
+            <text wx:if="{{item.remark}}" class="record-remark">{{item.remark}}</text>
+            <view wx:if="{{item.creator}}" class="record-creator-wrap">
+              <image wx:if="{{item.creatorAvatar}}" class="record-creator-avatar" src="{{item.creatorAvatar}}" mode="aspectFill"/>
+              <text class="record-creator">{{item.creator}}</text>
+            </view>
+            <text wx:if="{{item.isLocal}}" class="record-local-tag">(本地)</text>
+          </view>
+          <view class="record-right">
+            <text class="record-amount {{item.type === 'income' ? 'income' : 'expense'}}">
+              {{item.type === 'income' ? '+' : '-'}}{{item.amountDisplay}}
+            </text>
+            <!-- 待审核状态标签 -->
+            <text wx:if="{{item.status === 'pending'}}" class="record-status pending">待审核</text>
+            <text wx:if="{{item.status === 'approved'}}" class="record-status approved">已通过</text>
+            <text wx:if="{{item.status === 'rejected'}}" class="record-status rejected">已驳回</text>
+            <!-- 审核按钮（审核员及以上可见） -->
+            <view wx:if="{{item.status === 'pending' && (userRole === 'owner' || userRole === 'admin' || userRole === 'reviewer')}}" class="review-actions">
+              <text class="review-btn approve" catchtap="approveRecord" data-id="{{item._id}}">通过</text>
+              <text class="review-btn reject" catchtap="rejectRecord" data-id="{{item._id}}">驳回</text>
+            </view>
+            <text class="record-delete" catchtap="deleteRecord" data-id="{{item._id}}">删除</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 数据分析页面 -->
+  <view wx:if="{{currentTab === 'data'}}">
+    <!-- 月份选择器 -->
+    <view class="month-selector">
+      <view class="month-btn" bindtap="prevMonth">◀</view>
+      <view class="month-display">{{dataYear}}年{{dataMonth}}月</view>
+      <view class="month-btn" bindtap="nextMonth">▶</view>
+    </view>
+
+    <!-- 月度统计 -->
+    <view class="stats-card">
+      <view class="stats-title">{{dataMonth}}月经营概况</view>
+      <view class="stats-grid">
+        <view class="stat-item">
+          <text class="stat-label">收入</text>
+          <text class="stat-value income">+{{dataIncome}}</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-label">支出</text>
+          <text class="stat-value expense">-{{dataExpense}}</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-label">利润</text>
+          <text class="stat-value {{dataProfit >= 0 ? 'income' : 'expense'}}">{{dataProfit >= 0 ? '+' : ''}}{{dataProfit}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 收支趋势图 -->
+    <view class="chart-card">
+      <view class="chart-title">收支趋势</view>
+      <view class="chart-tabs">
+        <view class="chart-tab {{trendType === 'day' ? 'active' : ''}}" bindtap="switchTrendType" data-type="day">按日</view>
+      </view>
+      <view class="chart-container">
+        <canvas canvas-id="trendCanvas" class="trend-chart"></canvas>
+      </view>
+    </view>
+
+    <!-- 分类占比 -->
+    <view class="chart-card">
+      <view class="chart-title">分类占比</view>
+      <view class="chart-container">
+        <canvas canvas-id="categoryCanvas" class="pie-chart"></canvas>
+      </view>
+      <view class="legend-list">
+        <view class="legend-item" wx:for="{{categoryData}}" wx:key="name">
+          <view class="legend-color" style="background: {{item.color}}"></view>
+          <text class="legend-name">{{item.name}}</text>
+          <text class="legend-value">{{item.percent}}%</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 导出本月数据 -->
+    <view class="export-section" wx:if="{{isLoggedIn}}">
+      <button class="export-btn-large" bindtap="exportMonthData">导出本月数据</button>
+    </view>
+  </view>
+
+  <!-- 收支明细页面 -->
+  <view wx:if="{{currentTab === 'detail'}}">
+    <!-- 类型切换 -->
+    <view class="detail-tabs">
+      <view class="detail-tab {{detailType === 'income' ? 'active' : ''}}" bindtap="switchDetailType" data-type="income">收入</view>
+      <view class="detail-tab {{detailType === 'expense' ? 'active' : ''}}" bindtap="switchDetailType" data-type="expense">支出</view>
+    </view>
+
+    <!-- 跳转到详细页面 -->
+    <view class="export-section">
+      <button class="export-btn-large {{detailType === 'income' ? 'income-btn' : 'expense-btn'}}" bindtap="goToDetail">查看全部{{detailType === 'income' ? '收入' : '支出'}}明细</button>
+    </view>
+  </view>
+</view>
+
+<!-- 录入表单弹窗 -->
+<view class="modal-mask" wx:if="{{showModal}}" bindtap="closeModal"></view>
+<view class="modal-content" wx:if="{{showModal}}">
+  <view class="modal-header">{{formType === 'income' ? '记收入' : '记支出'}}</view>
+
+  <!-- 分类选择 -->
+  <view class="form-item">
+    <text class="form-label">分类</text>
+    <view class="category-picker">
+      <picker mode="selector" range="{{currentCategories}}" bindchange="onCategoryChange">
+        <view class="form-value">{{selectedCategory || '请选择'}}</view>
+      </picker>
+      <text class="add-cat-btn" bindtap="showAddCategoryModal">+</text>
+    </view>
+  </view>
+
+  <!-- 金额输入 -->
+  <view class="form-item">
+    <text class="form-label">金额（元）</text>
+    <input class="form-input" type="digit" placeholder="0.00" bindinput="onAmountInput" value="{{amount}}" />
+  </view>
+
+  <!-- 日期选择 -->
+  <picker mode="date" value="{{selectedDate}}" bindchange="onDateChange">
+    <view class="form-item">
+      <text class="form-label">日期</text>
+      <view class="form-value">{{selectedDate}}</view>
+    </view>
+  </picker>
+
+  <!-- 供应商输入（仅支出显示） -->
+  <view class="form-item" wx:if="{{formType === 'expense'}}">
+    <text class="form-label">供应商</text>
+    <input class="form-input" placeholder="选填" bindinput="onSupplierInput" value="{{supplier}}" />
+  </view>
+
+  <!-- 备注输入 -->
+  <view class="form-item">
+    <text class="form-label">备注</text>
+    <input class="form-input" placeholder="选填" bindinput="onRemarkInput" value="{{remark}}" />
+  </view>
+
+  <!-- 提交按钮 -->
+  <button class="submit-btn {{isValid ? '' : 'disabled'}}" bindtap="submitForm">确定</button>
+</view>
+
+<!-- 添加分类弹窗 -->
+<view class="modal-mask" wx:if="{{showAddCategory}}" bindtap="closeAddCategoryModal"></view>
+<view class="modal-content" wx:if="{{showAddCategory}}">
+  <view class="modal-header">添加分类</view>
+  <view class="form-item">
+    <text class="form-label">分类名称</text>
+    <input class="form-input" placeholder="请输入分类名称" bindinput="onNewCategoryInput" value="{{newCategoryName}}" />
+  </view>
+  <button class="submit-btn {{newCategoryName ? '' : 'disabled'}}" bindtap="confirmAddCategory">确定添加</button>
+  <button class="submit-btn cancel-btn" bindtap="closeAddCategoryModal">取消</button>
+</view>
+
+<!-- 设置弹窗 -->
+<view class="modal-mask" wx:if="{{showSettings}}" bindtap="closeSettings"></view>
+<view class="modal-content" wx:if="{{showSettings}}">
+  <view class="modal-header">设置</view>
+
+  <!-- 修改个人信息 -->
+  <view class="settings-section-title">个人信息</view>
+  <view class="profile-edit">
+    <view class="profile-avatar-wrap" bindtap="changeAvatar">
+      <view class="profile-avatar" style="background-color: {{profileAvatarColor}};">
+        <text class="profile-avatar-text">{{profileAvatarText}}</text>
+      </view>
+      <view class="profile-avatar-tip">点击更换</view>
+    </view>
+    <view class="profile-info">
+      <view class="profile-nickname-wrap">
+        <text class="profile-label">昵称</text>
+        <input class="profile-input" placeholder="请输入昵称" value="{{editNickName}}" bindinput="onNickNameInput" maxlength="20"/>
+      </view>
+      <view class="profile-phone-wrap">
+        <text class="profile-label">手机号</text>
+        <text class="profile-phone-value">{{userPhone || '未绑定'}}</text>
+        <button class="bind-phone-btn" open-type="getPhoneNumber" bindgetphonenumber="onGetPhoneNumber">{{userPhone ? '更换' : '绑定'}}</button>
+      </view>
+    </view>
+  </view>
+  <button class="submit-btn save-profile-btn" bindtap="saveProfile">保存信息</button>
+
+  <!-- 日结提醒 -->
+  <view class="settings-item">
+    <view class="settings-label">日结提醒</view>
+    <switch checked="{{settings.dailyReminderEnabled}}" bindchange="onDailyReminderChange" color="#1890FF"/>
+  </view>
+
+  <!-- 提醒时间 -->
+  <view class="settings-item" wx:if="{{settings.dailyReminderEnabled}}">
+    <view class="settings-label">提醒时间</view>
+    <picker mode="time" value="{{settings.reminderTime}}" bindchange="onReminderTimeChange">
+      <view class="settings-value">{{settings.reminderTime || '21:00'}}</view>
+    </picker>
+  </view>
+
+  <!-- 订阅消息模板 ID -->
+  <view class="settings-item" wx:if="{{settings.dailyReminderEnabled}}">
+    <view class="settings-label">模板ID</view>
+    <view class="settings-input-wrap">
+      <input class="settings-input template-id-input" type="text" placeholder="订阅消息模板ID" value="{{settings.templateId}}" bindinput="onTemplateIdInput"/>
+    </view>
+  </view>
+
+  <!-- 大额支出预警 -->
+  <view class="settings-item">
+    <view class="settings-label">大额支出预警</view>
+    <view class="settings-input-wrap">
+      <input class="settings-input" type="digit" placeholder="默认100元" value="{{expenseThreshold}}" bindinput="onExpenseThresholdInput"/>
+      <text class="settings-unit">元</text>
+    </view>
+  </view>
+
+  <!-- 亏损预警 -->
+  <view class="settings-item">
+    <view class="settings-label">亏损预警阈值</view>
+    <view class="settings-input-wrap">
+      <input class="settings-input" type="digit" placeholder="默认500元" value="{{lossThreshold}}" bindinput="onLossThresholdInput"/>
+      <text class="settings-unit">元</text>
+    </view>
+  </view>
+
+  <!-- 发送测试提醒 -->
+  <button class="submit-btn" bindtap="sendTestReminder">发送测试提醒</button>
+  <!-- 数据迁移按钮（仅店长可见） -->
+  <button wx:if="{{userRole === 'owner'}}" class="submit-btn migrate-btn" bindtap="migrateRecords">数据迁移</button>
+  <button class="submit-btn save-btn" bindtap="saveSettings">保存设置</button>
+  <button class="submit-btn logout-btn" bindtap="logout">退出登录</button>
+</view>
+
+<!-- 员工管理弹窗 -->
+<view class="modal-mask" wx:if="{{showUserManage}}" bindtap="closeUserManage"></view>
+<view class="modal-content user-manage-modal" wx:if="{{showUserManage}}">
+  <view class="modal-header">
+    员工管理
+    <text class="modal-close" bindtap="closeUserManage">×</text>
+  </view>
+
+  <view class="user-list">
+    <view wx:if="{{userList.length === 0}}" class="empty-tip">暂无员工</view>
+    <view wx:for="{{userList}}" wx:key="_id" class="user-list-item {{item.status === 'disabled' ? 'disabled' : ''}}">
+      <view class="user-list-info">
+        <view wx:if="{{item.avatarUrl}}" class="user-list-avatar" style="background-image: url({{item.avatarUrl}});"></view>
+        <view wx:else class="user-list-avatar default-avatar" style="background-color: {{item.avatarColor}};">
+          <text class="avatar-letter">{{item.nickName ? item.nickName.charAt(0) : '?'}}</text>
+        </view>
+        <view class="user-list-detail">
+          <view class="user-list-name-row">
+            <text class="user-list-name">{{item.nickName}}</text>
+            <text wx:if="{{item.status === 'disabled'}}" class="status-tag disabled">已禁用</text>
+          </view>
+          <text class="user-list-role {{item.role === 'owner' ? 'owner' : item.role === 'admin' ? 'admin' : item.role === 'reviewer' ? 'reviewer' : 'employee'}}">{{item.role === 'owner' ? '店长' : item.role === 'admin' ? '管理员' : item.role === 'reviewer' ? '审核员' : '录入员'}}</text>
+        </view>
+      </view>
+      <view wx:if="{{item.role !== 'owner'}}" class="user-list-actions">
+        <!-- 启用/禁用 -->
+        <view class="user-list-btn {{item.status === 'disabled' ? 'enable' : 'disable'}}" bindtap="toggleUserStatus" data-id="{{item._id}}">
+          {{item.status === 'disabled' ? '启用' : '禁用'}}
+        </view>
+        <!-- 重置数据 -->
+        <view class="user-list-btn reset" bindtap="resetEmployeeData" data-id="{{item._id}}">重置</view>
+        <!-- 修改角色 -->
+        <picker class="role-picker" value="{{item.roleIndex}}" range="{{roleOptions}}" range-key="name" bindchange="changeUserRole" data-id="{{item._id}}">
+          <view class="user-list-btn role-btn">{{item.role === 'owner' ? '店长' : item.role === 'admin' ? '管理员' : item.role === 'reviewer' ? '审核员' : '录入员'}} ▾</view>
+        </picker>
+        <!-- 删除 -->
+        <view class="user-list-btn delete" bindtap="removeUser" data-id="{{item._id}}">删除</view>
+        <!-- 转让店长 -->
+        <view class="user-list-btn transfer-owner" bindtap="transferOwner" data-id="{{item._id}}">转让店长</view>
+      </view>
+    </view>
+  </view>
+
+  <button class="submit-btn" bindtap="loadUserList">刷新列表</button>
+</view>
+
+<!-- 导出筛选弹窗 -->
+<view class="modal-mask" wx:if="{{showExportFilter}}" bindtap="closeExportFilter"></view>
+<view class="modal-content" wx:if="{{showExportFilter}}">
+  <view class="modal-header">导出筛选</view>
+
+  <!-- 日期范围 -->
+  <view class="filter-section">
+    <view class="filter-label">日期范围</view>
+    <view class="filter-row">
+      <picker mode="date" value="{{filterStartDate}}" bindchange="onFilterStartDateChange">
+        <view class="filter-picker">{{filterStartDate || '开始日期'}}</view>
+      </picker>
+      <text class="filter-separator">至</text>
+      <picker mode="date" value="{{filterEndDate}}" bindchange="onFilterEndDateChange">
+        <view class="filter-picker">{{filterEndDate || '结束日期'}}</view>
+      </picker>
+    </view>
+  </view>
+
+  <!-- 收支类型 -->
+  <view class="filter-section">
+    <view class="filter-label">收支类型</view>
+    <view class="filter-tags">
+      <view class="filter-tag {{filterType === 'all' ? 'active' : ''}}" bindtap="setFilterType" data-type="all">全部</view>
+      <view class="filter-tag {{filterType === 'income' ? 'active' : ''}}" bindtap="setFilterType" data-type="income">收入</view>
+      <view class="filter-tag {{filterType === 'expense' ? 'active' : ''}}" bindtap="setFilterType" data-type="expense">支出</view>
+    </view>
+  </view>
+
+  <!-- 分类筛选 -->
+  <view class="filter-section">
+    <view class="filter-label">分类筛选</view>
+    <view class="filter-tags">
+      <view class="filter-tag {{filterCategories.length === allCategories.length ? 'active' : ''}}" bindtap="toggleAllCategories">全选</view>
+      <view wx:for="{{allCategories}}" wx:key="*this" class="filter-tag {{filterCategories.indexOf(item) > -1 ? 'active' : ''}}" bindtap="toggleCategory" data-category="{{item}}">{{item}}</view>
+    </view>
+  </view>
+
+  <!-- 导出按钮 -->
+  <view class="filter-actions">
+    <button class="submit-btn" bindtap="doExportFiltered">导出 CSV</button>
+    <button class="submit-btn export-excel-btn" bindtap="doExportExcel">导出 Excel</button>
+  </view>
+</view>
