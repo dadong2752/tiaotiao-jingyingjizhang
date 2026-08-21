@@ -759,32 +759,14 @@ Page({
     const record = this.data.records.find(r => r._id === id);
     const { userRole, userInfo, isGuest } = this.data;
 
+    // 检查记录是否存在
+    if (!record) {
+      wx.showToast({ title: '记录不存在', icon: 'none' });
+      return;
+    }
+
     // 访客模式：直接编辑本地记录
     if (isGuest) {
-      if (record) {
-        const amount = (record.amount / 100).toFixed(2);
-        this.setData({
-          showModal: true,
-          formType: record.type,
-          selectedCategory: record.category,
-          amount: amount,
-          selectedDate: record.date,
-          remark: record.remark || '',
-          supplier: record.supplier || '',
-          editingId: id,
-          isValid: true
-        });
-      }
-      return;
-    }
-
-    // 权限检查：店长可以编辑所有记录，员工只能编辑自己的记录
-    if (userRole !== 'owner' && record.creatorOpenId !== (userInfo ? userInfo.openId : '')) {
-      wx.showToast({ title: '只能编辑自己的记录', icon: 'none' });
-      return;
-    }
-
-    if (record) {
       const amount = (record.amount / 100).toFixed(2);
       this.setData({
         showModal: true,
@@ -797,7 +779,27 @@ Page({
         editingId: id,
         isValid: true
       });
+      return;
     }
+
+    // 权限检查：店长可以编辑所有记录，员工只能编辑自己的记录
+    if (userRole !== 'owner' && record.creatorOpenId !== (userInfo ? userInfo.openId : '')) {
+      wx.showToast({ title: '只能编辑自己的记录', icon: 'none' });
+      return;
+    }
+
+    const amount = (record.amount / 100).toFixed(2);
+    this.setData({
+      showModal: true,
+      formType: record.type,
+      selectedCategory: record.category,
+      amount: amount,
+      selectedDate: record.date,
+      remark: record.remark || '',
+      supplier: record.supplier || '',
+      editingId: id,
+      isValid: true
+    });
   },
 
   // 删除记录（直接使用数据库）
@@ -825,6 +827,12 @@ Page({
     }
 
     const record = this.data.records.find(r => r._id === id);
+
+    // 检查记录是否存在
+    if (!record) {
+      wx.showToast({ title: '记录不存在', icon: 'none' });
+      return;
+    }
 
     // 权限检查：店长可以删除所有记录，员工只能删除自己的记录
     if (userRole !== 'owner' && record.creatorOpenId !== (userInfo ? userInfo.openId : '')) {

@@ -48,8 +48,20 @@ exports.main = async (event, context) => {
         return { success: false, error: '参数不完整' }
       }
 
+      // 角色值校验
+      const validRoles = ['owner', 'admin', 'reviewer', 'employee']
+      if (!validRoles.includes(newRole)) {
+        return { success: false, error: '非法的角色值' }
+      }
+
       if (targetUserId === currentUser._id) {
         return { success: false, error: '不能修改自己的角色' }
+      }
+
+      // 禁止修改店长的角色
+      const targetUserRes = await usersCollection.doc(targetUserId).get()
+      if (targetUserRes.data?.role === 'owner') {
+        return { success: false, error: '不能修改店长的角色' }
       }
 
       await usersCollection.doc(targetUserId).update({
@@ -135,6 +147,12 @@ exports.main = async (event, context) => {
 
       if (targetUserId === currentUser._id) {
         return { success: false, error: '不能删除自己' }
+      }
+
+      // 禁止删除店长
+      const targetUserRes = await usersCollection.doc(targetUserId).get()
+      if (targetUserRes.data?.role === 'owner') {
+        return { success: false, error: '不能删除店长账号' }
       }
 
       // 同时删除该用户的记录

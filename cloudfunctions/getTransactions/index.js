@@ -106,6 +106,11 @@ exports.main = async (event, context) => {
         return { success: false, error: '记录不存在' }
       }
 
+      // 检查记录状态，只能审核待审核状态的记录
+      if (recordRes.data.status !== 'pending') {
+        return { success: false, error: '只能审核待审核状态的记录' }
+      }
+
       await db.collection(COLLECTION).doc(recordId).update({
         data: {
           status: 'approved',
@@ -129,6 +134,11 @@ exports.main = async (event, context) => {
       const recordRes = await db.collection(COLLECTION).doc(recordId).get()
       if (!recordRes.data) {
         return { success: false, error: '记录不存在' }
+      }
+
+      // 检查记录状态，只能驳回待审核状态的记录
+      if (recordRes.data.status !== 'pending') {
+        return { success: false, error: '只能驳回待审核状态的记录' }
       }
 
       await db.collection(COLLECTION).doc(recordId).update({
@@ -207,11 +217,27 @@ exports.main = async (event, context) => {
     if (action === 'update') {
       const { recordId, category, amount, date, remark, supplier } = event
 
+      // 参数校验
+      if (!category) {
+        return { success: false, error: '请选择分类' }
+      }
+      if (typeof amount !== 'number' || amount <= 0 || amount > 99999999) {
+        return { success: false, error: '金额非法' }
+      }
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        return { success: false, error: '日期格式错误' }
+      }
+
       // 获取记录
       const recordRes = await db.collection(COLLECTION).doc(recordId).get()
 
       if (!recordRes.data) {
         return { success: false, error: '记录不存在' }
+      }
+
+      // 检查记录状态，审核通过的记录不能被修改
+      if (recordRes.data.status === 'approved') {
+        return { success: false, error: '已审核通过的记录不能修改' }
       }
 
       // 权限检查：店长/管理员可编辑所有记录，员工只能编辑自己的记录
@@ -223,9 +249,9 @@ exports.main = async (event, context) => {
       // 执行更新
       const updateData = {
         category,
-        amount,
+        amount: Math.round(amount),
         date,
-        remark,
+        remark: remark || '',
         updateTime: Date.now()
       }
       if (supplier !== undefined) {
@@ -248,6 +274,11 @@ exports.main = async (event, context) => {
 
       if (!recordRes.data) {
         return { success: false, error: '记录不存在' }
+      }
+
+      // 检查记录状态，审核通过的记录不能被删除
+      if (recordRes.data.status === 'approved') {
+        return { success: false, error: '已审核通过的记录不能删除' }
       }
 
       // 权限检查：店长/管理员可删除所有记录，员工只能删除自己的记录
