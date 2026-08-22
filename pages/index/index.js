@@ -95,11 +95,14 @@ Page({
       dataMonth: now.getMonth() + 1
     });
     this.initDate();
-    this.checkLocalUserInfo();
-    // 开启分享菜单
+    // 开启分享菜单（非阻塞）
     wx.showShareMenu({
       menus: ['shareAppMessage', 'shareTimeline']
     });
+    // 用户信息检查延迟执行，避免阻塞启动
+    setTimeout(() => {
+      this.checkLocalUserInfo();
+    }, 500);
   },
 
   // 登录（button 方式）
@@ -1722,7 +1725,6 @@ Page({
 
     const db = wx.cloud.database();
     const data = {
-      _id: userInfo.openId,  // 用 openId 作为 _id
       dailyReminderEnabled: settings.dailyReminderEnabled,
       reminderTime: settings.reminderTime,
       templateId: settings.templateId || '',
@@ -1730,14 +1732,27 @@ Page({
       lossThreshold: lossThreshold ? Math.round(parseFloat(lossThreshold) * 100) : 50000
     };
 
-    // 直接用 doc 写入，覆盖旧数据
-    db.collection('settings').doc(userInfo.openId).set({
+    // 使用 update 只更新指定字段，避免覆盖其他设置
+    db.collection('settings').doc(userInfo.openId).update({
       data: data,
       success: () => {
         wx.showToast({ title: '设置已保存', icon: 'success' });
       },
       fail: err => {
-        wx.showToast({ title: '保存失败', icon: 'none' });
+        // 如果文档不存在，先创建
+        if (err.errCode === -502005) {
+          db.collection('settings').doc(userInfo.openId).set({
+            data: { _id: userInfo.openId, ...data },
+            success: () => {
+              wx.showToast({ title: '设置已保存', icon: 'success' });
+            },
+            fail: () => {
+              wx.showToast({ title: '保存失败', icon: 'none' });
+            }
+          });
+        } else {
+          wx.showToast({ title: '保存失败', icon: 'none' });
+        }
       }
     });
   },

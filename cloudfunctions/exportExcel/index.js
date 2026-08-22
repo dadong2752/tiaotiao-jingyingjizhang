@@ -17,12 +17,14 @@ exports.main = async (event, context) => {
   const { startDate, endDate, type, categories } = event
 
   try {
-    // 获取用户信息验证是否为店长
+    // 获取用户信息验证是否为店长或管理员
     const userRes = await db.collection('users').where({ _id: openId }).get()
-    const isOwner = userRes.data && userRes.data.length > 0 && userRes.data[0].role === 'owner'
+    const userRole = userRes.data && userRes.data.length > 0 ? userRes.data[0].role : 'employee'
+    const isOwner = userRole === 'owner'
+    const isAdmin = userRole === 'admin'
 
-    if (!isOwner) {
-      return { success: false, error: '只有店长可以导出数据' }
+    if (!isOwner && !isAdmin) {
+      return { success: false, error: '只有店长和管理员可以导出数据' }
     }
 
     // 构建查询条件

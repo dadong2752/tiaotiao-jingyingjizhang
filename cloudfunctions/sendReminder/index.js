@@ -17,6 +17,16 @@ exports.main = async (event, context) => {
 
   const { action } = event
 
+  // 获取用户角色验证权限
+  const usersCollection = db.collection('users')
+  const userRes = await usersCollection.doc(openId).get()
+  if (!userRes.data) {
+    return { success: false, error: '用户不存在' }
+  }
+  const userRole = userRes.data.role || 'employee'
+  const isOwner = userRole === 'owner'
+  const isAdmin = userRole === 'admin'
+
   try {
     // 获取今日日期（北京时间 = UTC + 8小时）
     const now = new Date()
@@ -37,6 +47,11 @@ exports.main = async (event, context) => {
 
     // 日结提醒
     if (action === 'dailyReminder') {
+      // 权限检查：只有 owner 和 admin 可以发送日结提醒
+      if (!isOwner && !isAdmin) {
+        return { success: false, error: '无权执行此操作' }
+      }
+
       // 查询用户设置
       const settingsRes = await settingsCollection.where({
         _openid: openId
@@ -77,6 +92,11 @@ exports.main = async (event, context) => {
 
     // 异常预警检查
     if (action === 'checkAbnormal') {
+      // 权限检查：只有 owner 和 admin 可以执行异常检查
+      if (!isOwner && !isAdmin) {
+        return { success: false, error: '无权执行此操作' }
+      }
+
       const settingsRes = await settingsCollection.where({
         _openid: openId
       }).get()

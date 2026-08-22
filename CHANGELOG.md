@@ -1,5 +1,26 @@
 # 修改日志 (Change Log)
 
+## 2026-08-22 版本 1.0.5
+
+### 安全修复
+
+| 问题 | 文件 | 修复内容 | 状态 |
+|------|------|---------|------|
+| sendReminder缺少权限验证 | sendReminder/index.js | 添加owner/admin权限检查 | ✅ |
+| transferOwner缺少事务保护 | manageUsers/index.js | 添加db.startTransaction() | ✅ |
+| 硬编码模板ID | utils/config.js | 移除TEMPLATE_ID常量 | ✅ |
+| 审核通过记录保护 | getTransactions/index.js | 已有正确实现 | ✅ |
+
+### 权限修复
+
+| 问题 | 文件 | 修复内容 | 状态 |
+|------|------|---------|------|
+| 导出功能只允许owner | exportExcel/index.js | 改为允许owner和admin | ✅ |
+| migrateRecords只允许owner | migrateRecords/index.js | 改为允许owner和admin | ✅ |
+| settings保存覆盖全部数据 | pages/index/index.js | 改用update只更新字段 | ✅ |
+
+---
+
 ## 2026-08-21/22 版本 1.0.4
 
 ### 安全修复

@@ -198,23 +198,33 @@ exports.main = async (event, context) => {
         return { success: false, error: '目标用户不存在' }
       }
 
-      // 使用事务保证原子性：先更新目标用户，再更新当前用户
+      // 使用事务保证原子性
+      let transaction;
       try {
+        transaction = await db.startTransaction()
+
         // 先将目标用户升级为 owner
-        await usersCollection.doc(targetUserId).update({
+        await transaction.collection('users').doc(targetUserId).update({
           data: { role: 'owner' }
         })
 
         // 再将当前店长降为 admin
-        await usersCollection.doc(openId).update({
+        await transaction.collection('users').doc(openId).update({
           data: { role: 'admin' }
         })
+
+        // 提交事务
+        await transaction.commit()
 
         return {
           success: true,
           message: '店长权限已转让，原店长降为管理员'
         }
       } catch (err) {
+        // 回滚事务
+        if (transaction) {
+          await transaction.rollback()
+        }
         return { success: false, error: '转让失败: ' + err.message }
       }
     }

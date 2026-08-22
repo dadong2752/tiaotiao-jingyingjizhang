@@ -22,9 +22,9 @@ exports.main = async (event, context) => {
 
     const currentUser = currentUserRes.data[0]
 
-    // 只有店长可以执行迁移
-    if (currentUser.role !== 'owner') {
-      return { success: false, error: '只有店长可以执行数据迁移' }
+    // 只有店长和管理员可以执行迁移
+    if (currentUser.role !== 'owner' && currentUser.role !== 'admin') {
+      return { success: false, error: '只有店长和管理员可以执行数据迁移' }
     }
 
     // 获取所有用户，用于昵称到 openId 的映射
