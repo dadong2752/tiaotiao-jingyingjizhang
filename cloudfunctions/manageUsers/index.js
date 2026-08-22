@@ -109,6 +109,11 @@ exports.main = async (event, context) => {
         return { success: false, error: '用户不存在' }
       }
 
+      // 禁止重置店长数据
+      if (targetUserRes.data.role === 'owner') {
+        return { success: false, error: '不能重置店长数据' }
+      }
+
       // 获取该员工创建的所有记录
       const records = await transactionsCollection.where({
         creatorOpenId: targetUserId
@@ -130,6 +135,11 @@ exports.main = async (event, context) => {
     if (action === 'setPermissions') {
       if (!targetUserId || !permissions) {
         return { success: false, error: '参数不完整' }
+      }
+
+      // 校验权限结构
+      if (typeof permissions !== 'object' || permissions === null) {
+        return { success: false, error: '权限格式非法' }
       }
 
       await usersCollection.doc(targetUserId).update({
@@ -188,19 +198,24 @@ exports.main = async (event, context) => {
         return { success: false, error: '目标用户不存在' }
       }
 
-      // 将当前店长的角色降为 admin
-      await usersCollection.doc(openId).update({
-        data: { role: 'admin' }
-      })
+      // 使用事务保证原子性：先更新目标用户，再更新当前用户
+      try {
+        // 先将目标用户升级为 owner
+        await usersCollection.doc(targetUserId).update({
+          data: { role: 'owner' }
+        })
 
-      // 将目标用户升级为 owner
-      await usersCollection.doc(targetUserId).update({
-        data: { role: 'owner' }
-      })
+        // 再将当前店长降为 admin
+        await usersCollection.doc(openId).update({
+          data: { role: 'admin' }
+        })
 
-      return {
-        success: true,
-        message: '店长权限已转让，原店长降为管理员'
+        return {
+          success: true,
+          message: '店长权限已转让，原店长降为管理员'
+        }
+      } catch (err) {
+        return { success: false, error: '转让失败: ' + err.message }
       }
     }
 

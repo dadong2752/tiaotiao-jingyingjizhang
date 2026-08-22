@@ -21,6 +21,15 @@ exports.main = async (event, context) => {
       return { success: false, error: '授权码无效' }
     }
 
+    // 验证用户存在
+    const userCheck = await usersCollection.doc(openId).get()
+    if (!userCheck.data) {
+      return { success: false, error: '用户不存在' }
+    }
+    if (userCheck.data.status === 'disabled') {
+      return { success: false, error: '账号已被禁用' }
+    }
+
     try {
       // 调用微信接口获取手机号
       const phoneRes = await cloud.openapi.phonenumber.getPhoneNumber({ code })
@@ -31,7 +40,9 @@ exports.main = async (event, context) => {
         data: { phone: phoneNumber }
       })
 
-      return { success: true, data: { phoneNumber } }
+      // 返回脱敏手机号
+      const maskedPhone = phoneNumber.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')
+      return { success: true, data: { phoneNumber: maskedPhone } }
     } catch (err) {
       return { success: false, error: err.message || '绑定失败' }
     }
@@ -61,7 +72,9 @@ exports.main = async (event, context) => {
         userRes.data = { ...userRes.data, ...updateData };
       }
 
-      // 返回用户信息
+      // 返回用户信息（手机号脱敏）
+      const rawPhone = userRes.data.phone || ''
+      const maskedPhone = rawPhone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')
       return {
         success: true,
         data: {
@@ -70,7 +83,7 @@ exports.main = async (event, context) => {
           nickName: userRes.data.nickName,
           avatarUrl: userRes.data.avatarUrl,
           role: userRes.data.role || 'employee',
-          phone: userRes.data.phone || '',
+          phone: maskedPhone,
           createTime: userRes.data.createTime
         }
       }

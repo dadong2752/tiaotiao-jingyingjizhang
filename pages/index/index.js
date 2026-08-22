@@ -1031,8 +1031,11 @@ Page({
 
         if (res.result && res.result.success) {
           const allData = res.result.data;
-          // 筛选当月数据
-          const monthData = allData.filter(item => item.date >= monthStart && item.date <= monthEnd);
+          // 筛选当月数据（使用日期对象比较）
+          const monthData = allData.filter(item => {
+            const itemDate = new Date(item.date);
+            return itemDate >= new Date(monthStart) && itemDate <= new Date(monthEnd);
+          });
 
           this.processDataPageStats(monthData);
           this.processCategoryData(monthData);
@@ -1260,7 +1263,7 @@ Page({
 
   // 导出本月数据
   exportMonthData() {
-    const { dataYear, dataMonth, monthData } = this.data;
+    const { dataYear, dataMonth, monthData, filterCategories } = this.data;
 
     // 如果没有数据，先加载数据
     if (!monthData || monthData.length === 0) {
@@ -1274,7 +1277,13 @@ Page({
             const allData = res.result.data;
             const monthStart = this.getDataMonthFirstDay();
             const monthEnd = this.getDataMonthLastDay();
-            const filteredData = allData.filter(item => item.date >= monthStart && item.date <= monthEnd);
+            // 日期比较 + 分类筛选
+            const filteredData = allData.filter(item => {
+              const itemDate = new Date(item.date);
+              const inMonth = itemDate >= new Date(monthStart) && itemDate <= new Date(monthEnd);
+              const inCategory = filterCategories.length === 0 || filterCategories.includes(item.category);
+              return inMonth && inCategory;
+            });
 
             if (filteredData.length === 0) {
               wx.showToast({ title: '本月暂无数据', icon: 'none' });
@@ -1295,7 +1304,17 @@ Page({
       return;
     }
 
-    this.doExportMonthCSV(monthData, dataYear, dataMonth);
+    // 应用分类筛选
+    const filteredData = monthData.filter(item => {
+      return filterCategories.length === 0 || filterCategories.includes(item.category);
+    });
+
+    if (filteredData.length === 0) {
+      wx.showToast({ title: '筛选后无数据', icon: 'none' });
+      return;
+    }
+
+    this.doExportMonthCSV(filteredData, dataYear, dataMonth);
   },
 
   // 执行导出本月数据

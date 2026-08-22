@@ -5,6 +5,20 @@ cloud.init({ env: 'cloud1-d6gqwroxrc08ea02c' })
 const db = cloud.database()
 const COLLECTION = 'transactions'
 
+// 分类白名单
+const VALID_INCOME_CATEGORIES = ['收钱吧', '美团团购', '抖音团购', '现金', '美团外卖', '淘宝外卖', '京东外卖', '其他外卖', '废品', '废油', '其他']
+const VALID_EXPENSE_CATEGORIES = ['食材', '杂支', '物流费', '营销费用', '水电气', '房租', '工资']
+
+// 验证分类是否合法
+function isValidCategory(type, category) {
+  if (type === 'income') {
+    return VALID_INCOME_CATEGORIES.includes(category)
+  } else if (type === 'expense') {
+    return VALID_EXPENSE_CATEGORIES.includes(category)
+  }
+  return false
+}
+
 // 分页获取所有记录
 async function getAllRecords(query) {
   const allData = []
@@ -75,6 +89,10 @@ exports.main = async (event, context) => {
       }
       if (!category) {
         return { success: false, error: '请选择分类' }
+      }
+      // 分类白名单校验
+      if (!isValidCategory(type, category)) {
+        return { success: false, error: '分类非法' }
       }
 
       // 获取用户昵称
@@ -235,6 +253,13 @@ exports.main = async (event, context) => {
     if (action === 'update') {
       const { recordId, category, amount, date, remark, supplier } = event
 
+      // 获取记录
+      const recordRes = await db.collection(COLLECTION).doc(recordId).get()
+
+      if (!recordRes.data) {
+        return { success: false, error: '记录不存在' }
+      }
+
       // 参数校验
       if (!category) {
         return { success: false, error: '请选择分类' }
@@ -246,11 +271,9 @@ exports.main = async (event, context) => {
         return { success: false, error: '日期格式错误' }
       }
 
-      // 获取记录
-      const recordRes = await db.collection(COLLECTION).doc(recordId).get()
-
-      if (!recordRes.data) {
-        return { success: false, error: '记录不存在' }
+      // 分类白名单校验（使用记录原有的type）
+      if (!isValidCategory(recordRes.data.type, category)) {
+        return { success: false, error: '分类非法' }
       }
 
       // 检查记录状态，审核通过的记录不能被修改
