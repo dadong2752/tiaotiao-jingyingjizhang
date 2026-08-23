@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>小程序首页预览</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #e8e8e8;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .preview {
+      width: 375px;
+      background: #F5F5F5;
+      border-radius: 40px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+    .status-bar {
+      height: 44px;
+      background: #1890FF;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 10px;
+    }
+    .status-bar span {
+      color: white;
+      font-size: 15px;
+      font-weight: 500;
+    }
+    .header {
+      background: #1890FF;
+      padding: 30px 20px 20px;
+    }
+    .header-title {
+      color: white;
+      font-size: 18px;
+      font-weight: 500;
+      text-align: center;
+    }
+    .content {
+      padding: 20px;
+    }
+    /* Logo 区 */
+    .logo-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 0;
+    }
+    .logo-icon {
+      width: 140rpx;
+      height: 140rpx;
+      background: linear-gradient(135deg, #FF6B6B 0%, #FFA500 100%);
+      border-radius: 32rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 12rpx 32rpx rgba(255, 107, 107, 0.35);
+      position: relative;
+      width: 70px;
+      height: 70px;
+    }
+    .logo-icon::after {
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      right: 4px;
+      bottom: 4px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 24px;
+    }
+    .logo-coin {
+      font-size: 36px;
+      font-weight: bold;
+      color: #FFFFFF;
+    }
+    .logo-text {
+      margin-top: 16px;
+      font-size: 22px;
+      font-weight: 800;
+      color: #333;
+      letter-spacing: 3px;
+    }
+    .logo-subtitle {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #999;
+    }
+    /* 统计卡片 */
+    .stats-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .stats-title {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 16px;
+    }
+    .stats-grid {
+      display: flex;
+      justify-content: space-between;
+    }
+    .stat-item {
+      flex: 1;
+      text-align: center;
+    }
+    .stat-label {
+      display: block;
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+    .stat-value {
+      display: block;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .income { color: #52C41A; }
+    .expense { color: #FF4D4F; }
+    /* 按钮 */
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin: 24px 0;
+    }
+    .action-btn {
+      flex: 1;
+      height: 44px;
+      line-height: 44px;
+      font-size: 15px;
+      font-weight: bold;
+      border-radius: 12px;
+      border: none;
+      color: #fff;
+    }
+    .income-btn { background: #52C41A; }
+    .expense-btn { background: #FF4D4F; }
+    .share-btn { background: #1890FF; }
+    /* 记录列表 */
+    .records-section {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+    }
+    .section-title {
+      font-size: 15px;
+      color: #333;
+      font-weight: bold;
+      margin-bottom: 16px;
+    }
+    .empty-tip {
+      text-align: center;
+      color: #999;
+      padding: 40px 0;
+      font-size: 14px;
+    }
+    .bottom-nav {
+      height: 30px;
+      background: #fff;
+      border-top: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .home-icon {
+      width: 24px;
+      height: 24px;
+      background: #1890FF;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="preview">
+    <div class="status-bar">
+      <span>9:41</span>
+    </div>
+    <div class="header">
+      <div class="header-title">餐饮店经营记账</div>
+    </div>
+    <div class="content">
+      <!-- Logo 区 -->
+      <div class="logo-section">
+        <div class="logo-icon">
+          <span class="logo-coin">¥</span>
+        </div>
+        <div class="logo-text">餐饮记账</div>
+        <div class="logo-subtitle">每日收支 · 实时掌控</div>
+      </div>
+
+      <!-- 统计卡片 -->
+      <div class="stats-card">
+        <div class="stats-title">今日数据</div>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-label">收入</span>
+            <span class="stat-value income">+888.00</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">支出</span>
+            <span class="stat-value expense">-320.00</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">利润</span>
+            <span class="stat-value income">+568.00</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-card">
+        <div class="stats-title">本月数据</div>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-label">收入</span>
+            <span class="stat-value income">+12,680.00</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">支出</span>
+            <span class="stat-value expense">-8,450.00</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">利润</span>
+            <span class="stat-value income">+4,230.00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 按钮 -->
+      <div class="action-buttons">
+        <button class="action-btn income-btn">记收入</button>
+        <button class="action-btn expense-btn">记支出</button>
+        <button class="action-btn share-btn">分享</button>
+      </div>
+
+      <!-- 记录列表 -->
+      <div class="records-section">
+        <div class="section-title">最近记录</div>
+        <div class="empty-tip">开始我的饮品记录</div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <div class="home-icon"></div>
+    </div>
+  </div>
+</body>
+</html>

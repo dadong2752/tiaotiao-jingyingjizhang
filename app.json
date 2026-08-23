@@ -1,0 +1,15 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/expense/expense",
+    "pages/income/income"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#1890FF",
+    "navigationBarTitleText": "跳跳经营记账",
+    "navigationBarTextStyle": "white"
+  },
+  "lazyCodeLoading": "requiredComponents",
+  "sitemapLocation": "sitemap.json"
+}

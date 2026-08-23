@@ -1,0 +1,16 @@
+# 微信小程序
+node_modules/
+.cloudfunctionSession/
+.DS_Store
+*.wxss.d.ts
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# 日志
+*.log
+
+# 微信开发者工具
+.wechat/
