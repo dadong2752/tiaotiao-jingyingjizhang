@@ -204,3 +204,4 @@ drinkexpensetracker-miniapp/
 ## License
 
 MIT
+这是我在本地电脑上用Git修改的内容
