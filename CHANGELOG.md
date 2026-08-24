@@ -1,5 +1,39 @@
 # 修改日志 (Change Log)
 
+## 2026-08-24 版本 1.1.0
+
+### 新功能
+
+| 功能 | 文件 | 说明 | 状态 |
+|------|------|------|------|
+| 手机号+密码注册 | login/index.js | 新用户手机号+密码注册 | ✅ |
+| 手机号+密码登录 | login/index.js | 支持账号密码登录 | ✅ |
+| 微信一键登录 | login/index.js | 微信授权获取手机号 | ✅ |
+| 忘记密码 | login/index.js | 邮箱找回密码 | ✅ |
+| 注册审核 | manageUsers/index.js | 管理员审核新用户 | ✅ |
+| 绑定手机号 | bindPhone | 微信登录后绑定手机号 | ✅ |
+| 更换手机号 | manageUsers/index.js | 用户可更换手机号 | ✅ |
+
+### 新增页面
+
+| 页面 | 路径 | 说明 |
+|------|------|------|
+| 登录页 | pages/login/ | 手机号+密码/微信登录 |
+| 注册页 | pages/register/ | 新用户注册 |
+| 忘记密码页 | pages/forgot/ | 邮箱找回密码 |
+| 重置密码页 | pages/reset/ | 设置新密码 |
+| 绑定手机号 | pages/bindPhone/ | 微信登录后绑定 |
+
+### 安全修复
+
+| 问题 | 文件 | 修复内容 | 状态 |
+|------|------|---------|------|
+| 微信一键登录参数缺失 | login/index.js | 支持code参数获取手机号 | ✅ |
+| approveUser重复审核 | manageUsers/index.js | 添加pending状态检查 | ✅ |
+| 拒绝状态语义不清 | manageUsers/index.js | 拒绝改为rejected状态 | ✅ |
+
+---
+
 ## 2026-08-22 版本 1.0.5
 
 ### 安全修复
