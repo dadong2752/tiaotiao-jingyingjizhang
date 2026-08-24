@@ -10,7 +10,7 @@
   <!-- 用户信息栏 -->
   <view class="user-bar">
     <!-- 左侧：登录/用户信息 -->
-    <button wx:if="{{!isLoggedIn}}" class="login-btn" open-type="getUserInfo" bindgetuserinfo="onGetUserInfo">
+    <button wx:if="{{!isLoggedIn}}" class="login-btn" bindtap="goToLogin">
       <view class="login-tip">
         <text class="login-text">点击登录</text>
       </view>

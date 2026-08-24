@@ -178,9 +178,8 @@ Page({
   checkLocalUserInfo() {
     const userInfo = wx.getStorageSync('userInfo');
     const userRole = wx.getStorageSync('userRole');
-    const guestTransactions = wx.getStorageSync('guestTransactions') || [];
 
-    if (userInfo) {
+    if (userInfo && userInfo.openId) {
       this.setData({
         userInfo: userInfo,
         userRole: userRole || 'employee',
@@ -189,15 +188,13 @@ Page({
       });
       // 加载记录
       this.loadRecords();
-    } else if (guestTransactions.length > 0) {
-      // 有访客数据，恢复访客模式
-      this.setData({
-        isGuest: true,
-        isLoggedIn: false
-      });
-      this.loadGuestRecords();
-      this.calculateGuestStats();
     }
+    // 未登录用户不自动跳转，等待用户点击登录按钮
+  },
+
+  // 跳转到登录页
+  goToLogin() {
+    wx.navigateTo({ url: '/pages/login/login' });
   },
 
   onShow() {

@@ -49,7 +49,7 @@
     "disableSWC": true
   },
   "compileType": "miniprogram",
-  "libVersion": "development",
+  "libVersion": "3.17.0",
   "appid": "wx4dd05bae3a831114",
   "projectname": "drinkexpensetracker",
   "condition": {},

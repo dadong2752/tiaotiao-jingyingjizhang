@@ -1,0 +1,22 @@
+<view class="container">
+  <view class="header">
+    <text class="title">设置新密码</text>
+    <text class="desc">请输入您的新密码</text>
+  </view>
+
+  <view class="form">
+    <view class="form-item">
+      <view class="label">新密码</view>
+      <input password="true" placeholder="至少6位" bindinput="onNewPasswordInput" value="{{newPassword}}" />
+    </view>
+
+    <view class="form-item">
+      <view class="label">确认密码</view>
+      <input password="true" placeholder="再次输入密码" bindinput="onConfirmPasswordInput" value="{{confirmPassword}}" />
+    </view>
+
+    <view class="btn-area">
+      <button type="primary" bindtap="onResetPassword" disabled="{{!canReset}}">确认重置</button>
+    </view>
+  </view>
+</view>

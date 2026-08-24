@@ -1,0 +1,21 @@
+<view class="container">
+  <view class="header">
+    <text class="title">找回密码</text>
+    <text class="desc">输入您注册的邮箱地址</text>
+  </view>
+
+  <view class="form">
+    <view class="form-item">
+      <input type="text" placeholder="请输入邮箱" bindinput="onEmailInput" value="{{email}}" />
+    </view>
+
+    <view class="btn-area">
+      <button type="primary" bindtap="onSendReset" disabled="{{!canSend}}">发送重置链接</button>
+    </view>
+
+    <view class="tip">
+      <text>* 邮件有效期24小时</text>
+      <text>* 如果邮箱未注册，将不会收到邮件</text>
+    </view>
+  </view>
+</view>

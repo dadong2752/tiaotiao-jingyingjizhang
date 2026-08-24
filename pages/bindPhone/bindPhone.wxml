@@ -1,0 +1,26 @@
+<view class="container">
+  <view class="header">
+    <text class="title">请先绑定手机号</text>
+    <text class="desc">为保障账户安全，请先绑定手机号</text>
+  </view>
+
+  <view class="form">
+    <view class="form-item">
+      <view class="label">手机号</view>
+      <input type="number" placeholder="请输入手机号" maxlength="11" bindinput="onPhoneInput" value="{{phone}}" />
+    </view>
+
+    <view class="form-item">
+      <view class="label">设置密码</view>
+      <input password="true" placeholder="至少6位" bindinput="onPasswordInput" value="{{password}}" />
+    </view>
+
+    <view class="btn-area">
+      <button type="primary" bindtap="onBindPhone" disabled="{{!canBind}}">确认绑定</button>
+    </view>
+
+    <view class="tip">
+      <text>* 绑定后可使用手机号登录</text>
+    </view>
+  </view>
+</view>

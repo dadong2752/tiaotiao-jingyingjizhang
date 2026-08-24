@@ -2,7 +2,12 @@
   "pages": [
     "pages/index/index",
     "pages/expense/expense",
-    "pages/income/income"
+    "pages/income/income",
+    "pages/login/login",
+    "pages/register/register",
+    "pages/forgot/forgot",
+    "pages/reset/reset",
+    "pages/bindPhone/bindPhone"
   ],
   "window": {
     "backgroundTextStyle": "light",

@@ -229,6 +229,110 @@ exports.main = async (event, context) => {
       }
     }
 
+    // 更新邮箱
+    if (action === 'updateEmail') {
+      const { email, password } = event
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return { success: false, error: '邮箱格式错误' }
+      }
+      if (!password) {
+        return { success: false, error: '请输入密码验证' }
+      }
+
+      const userRes = await usersCollection.doc(openId).get()
+      if (!userRes.data) {
+        return { success: false, error: '用户不存在' }
+      }
+
+      // 验证密码
+      const crypto = require('crypto')
+      const hashPassword = (p) => crypto.createHash('sha256').update(p).digest('hex')
+      if (userRes.data.password !== hashPassword(password)) {
+        return { success: false, error: '密码错误' }
+      }
+
+      await usersCollection.doc(openId).update({
+        data: { email: email }
+      })
+
+      return { success: true, message: '邮箱已更新' }
+    }
+
+    // 更换手机号
+    if (action === 'updatePhone') {
+      const { oldPhone, newPhone, password } = event
+
+      if (!oldPhone || !/^1[3-9]\d{9}$/.test(oldPhone)) {
+        return { success: false, error: '原手机号格式错误' }
+      }
+      if (!newPhone || !/^1[3-9]\d{9}$/.test(newPhone)) {
+        return { success: false, error: '新手机号格式错误' }
+      }
+      if (!password) {
+        return { success: false, error: '请输入密码验证' }
+      }
+
+      const userRes = await usersCollection.doc(openId).get()
+      if (!userRes.data) {
+        return { success: false, error: '用户不存在' }
+      }
+
+      // 验证密码
+      const crypto = require('crypto')
+      const hashPassword = (p) => crypto.createHash('sha256').update(p).digest('hex')
+      if (userRes.data.password !== hashPassword(password)) {
+        return { success: false, error: '密码错误' }
+      }
+
+      // 检查新手机号是否已被使用
+      const existingByPhone = await usersCollection.where({ phone: newPhone }).get()
+      if (existingByPhone.data && existingByPhone.data.length > 0) {
+        return { success: false, error: '该手机号已被其他账号使用' }
+      }
+
+      await usersCollection.doc(openId).update({
+        data: { phone: newPhone }
+      })
+
+      return { success: true, message: '手机号已更换' }
+    }
+
+    // 审核用户（通过/拒绝）
+    if (action === 'approveUser') {
+      const { targetUserId, approved } = event
+
+      if (!targetUserId) {
+        return { success: false, error: '参数不完整' }
+      }
+
+      // 只有 owner 和 admin 可以审核用户
+      if (currentUser.role !== 'owner' && currentUser.role !== 'admin') {
+        return { success: false, error: '只有管理员可以审核用户' }
+      }
+
+      const targetUserRes = await usersCollection.doc(targetUserId).get()
+      if (!targetUserRes.data) {
+        return { success: false, error: '用户不存在' }
+      }
+
+      // 只有待审核状态才能审核
+      if (targetUserRes.data.status !== 'pending') {
+        return { success: false, error: '该用户无需审核或已被处理' }
+      }
+
+      // 更新用户状态：通过->enabled，拒绝->rejected
+      const newStatus = approved ? 'enabled' : 'rejected'
+      await usersCollection.doc(targetUserId).update({
+        data: { status: newStatus }
+      })
+
+      return {
+        success: true,
+        message: approved ? '已通过审核' : '已拒绝'
+      }
+    }
+
     return { success: false, error: '未知操作' }
 
   } catch (err) {

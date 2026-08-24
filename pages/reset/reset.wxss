@@ -1,0 +1,67 @@
+.container {
+  min-height: 100vh;
+  background: #f5f6fa;
+  padding: 40rpx;
+}
+
+.header {
+  padding: 60rpx 0 40rpx;
+}
+
+.header .title {
+  display: block;
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+
+.header .desc {
+  display: block;
+  font-size: 28rpx;
+  color: #999;
+}
+
+.form {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 48rpx 32rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.05);
+}
+
+.form-item {
+  margin-bottom: 32rpx;
+}
+
+.form-item .label {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 12rpx;
+}
+
+.form-item input {
+  height: 88rpx;
+  background: #f5f6fa;
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  font-size: 28rpx;
+}
+
+.btn-area {
+  margin-top: 48rpx;
+}
+
+.btn-area button {
+  height: 88rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border-radius: 44rpx;
+  font-size: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-area button[disabled] {
+  background: #ccc;
+}
